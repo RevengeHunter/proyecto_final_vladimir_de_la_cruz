@@ -1,1 +1,1 @@
-doc de prueba por B, creando conflicto desde la rama 2
+doc prueba editado por A y B, creando conflicto en rama 2 y rama 1.
