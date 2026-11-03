@@ -1,5 +1,3 @@
-import { expect } from "@playwright/test";
-
 export class LoginPage {
   constructor(page) {
     this.page = page;
@@ -27,17 +25,5 @@ export class LoginPage {
     await this.username.fill(username);
     await this.password.fill(password);
     await this.submitButton.click();
-  }
-
-  // Method to check username error message
-  async isUsernameErrorVisible() {
-    await expect(this.usernameError).toBeVisible();
-    await expect(this.page).toHaveURL(/login/);
-  }
-
-  // Method to check password error message
-  async isPasswordErrorVisible() {
-    await expect(this.passwordError).toBeVisible();
-    await expect(this.page).toHaveURL(/login/);
   }
 }

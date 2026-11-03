@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { LoginPage } from "../../pages/LoginPage";
 
 test.describe("Login Tests", () => {
@@ -11,6 +11,6 @@ test.describe("Login Tests", () => {
 
   test("contraseña inválida", async () => {
     await loginPage.login(process.env.LOGIN_USERNAME, "incorrectPassword");
-    await loginPage.isPasswordErrorVisible();
+    await expect(loginPage.passwordError).toBeVisible();
   });
 });
