@@ -14,10 +14,26 @@ export const test = base.extend({
       password: process.env.LOGIN_PASSWORD,
     });
   },
+  accountInformation: async ({}, use) => {
+    await use({
+      name: process.env.SIGNUP_NAME,
+      email: process.env.SIGNUP_EMAIL,
+    });
+  },
   loginPageTwoFactor: async ({ page }, use) => {
     const loginPageTwoFactor = new LoginPageTwoFactor(page);
     await loginPageTwoFactor.goto();
     await use(loginPageTwoFactor);
+  },
+  signUp: async ({ page }, use) => {
+    const signUp = new SignUpPage(page);
+    await signUp.goto();
+    await use(signUp);
+  },
+  createAccount: async ({ page }, use) => {
+    const createAccount = new CreateAccountPage(page);
+    await createAccount.goto();
+    await use(createAccount);
   },
 });
 
