@@ -1,0 +1,38 @@
+[
+  {
+    "field": "name",
+    "description": "full name of the user"
+  },
+  {
+    "field": "password",
+    "description": "password for the user account"
+  },
+  {
+    "field": "first_name",
+    "description": "first name of the user"
+  },
+  {
+    "field": "last_name",
+    "description": "last name of the user"
+  },
+  {
+    "field": "address",
+    "description": "address of the user"
+  },
+  {
+    "field": "state",
+    "description": "state of the user"
+  },
+  {
+    "field": "city",
+    "description": "city of the user"
+  },
+  {
+    "field": "zipcode",
+    "description": "zipcode of the user"
+  },
+  {
+    "field": "mobile_number",
+    "description": "mobile number of the user"
+  }
+]

@@ -2,18 +2,13 @@ export class SignUpPage {
   constructor(page) {
     this.page = page;
 
-    // Locators
-    this.nameInput = page.getByRole("textbox", { name: "Name" });
-    this.emailInput = page.getByRole("textbox", { name: "Email Address" });
-    this.signupButton = page.getByRole("button", { name: "Signup" });
+    this.nameInput = page.locator('[data-qa="signup-name"]');
+    this.emailInput = page.locator('[data-qa="signup-email"]');
+    this.signupButton = page.locator('[data-qa="signup-button"]');
 
-    this.signUpHeading = page.getByRole("heading", {
-      name: "ENTER ACCOUNT INFORMATION",
-      level: 2,
-    });
-
-    this.errorMessage = page.locator("#error");
-    this.successMessage = page.getByText("Signup successful!");
+    this.emailAlreadyExistsError = page.getByText(
+      "Email Address already exist!",
+    );
   }
 
   // Method to go to the login page

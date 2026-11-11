@@ -1,0 +1,13 @@
+{
+  "day": "1",
+  "month": "January",
+  "year": "2000",
+  "first_name": "John",
+  "last_name": "Doe",
+  "address": "123 Main St",
+  "country": "United States",
+  "state": "California",
+  "city": "Los Angeles",
+  "zipcode": "90210",
+  "mobile_number": "555-1234"
+}
