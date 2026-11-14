@@ -3,6 +3,10 @@ import { LoginPage } from "../pages/LoginPage";
 import { LoginPageTwoFactor } from "../pages/LoginPageTwoFactor";
 import { SignUpPage } from "../pages/SignUpPage";
 import { CreateAccountPage } from "../pages/CreateAccountPage";
+import { CartPage } from "../pages/CartPage";
+import { ViewCartPage } from "../pages/ViewCartPage";
+import { CheckoutPage } from "../pages/CheckoutPage";
+import { PaymentPage } from "../pages/PaymentPage";
 import accountData from "../test-data/data-sign-up-account.json";
 
 export const test = base.extend({
@@ -44,6 +48,35 @@ export const test = base.extend({
   createAccount: async ({ page }, use) => {
     const createAccount = new CreateAccountPage(page);
     await use(createAccount);
+  },
+  shoppingAccount: async ({}, use) => {
+    await use({
+      name: process.env.SIGNUP_NAME,
+      email: process.env.SHOPPING_EMAIL,
+    });
+  },
+  paymentData: async ({}, use) => {
+    await use({
+      name: process.env.CARD_NAME,
+      number: process.env.CARD_NUMBER,
+      cvc: process.env.CARD_CVC,
+      month: process.env.CARD_MONTH,
+      year: process.env.CARD_YEAR,
+    });
+  },
+  // Estos fixtures no navegan: si dos navegaran, ganaria el ultimo en correr.
+  // La navegacion la maneja el test de forma explicita.
+  cart: async ({ page }, use) => {
+    await use(new CartPage(page));
+  },
+  viewCart: async ({ page }, use) => {
+    await use(new ViewCartPage(page));
+  },
+  checkout: async ({ page }, use) => {
+    await use(new CheckoutPage(page));
+  },
+  payment: async ({ page }, use) => {
+    await use(new PaymentPage(page));
   },
 });
 

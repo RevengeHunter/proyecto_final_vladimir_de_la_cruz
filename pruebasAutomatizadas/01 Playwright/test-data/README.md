@@ -8,6 +8,18 @@
   en `tests/sign-up/required-fields-sign-up.spec.js`. Es un array plano de casos: cada entrada
   genera un test.
 
+- **`data-clothes.json`** — los 4 productos que compra
+  `tests/shopping/valid-shopping.spec.js`. `clotheId` es el `data-product-id` del sitio,
+  y `clothePrice` el precio esperado en el carrito.
+
+  Los precios tienen que coincidir con los del sitio: el test afirma el precio y el subtotal de
+  cada producto, y el total contra la suma calculada (no hay total hardcodeado). Si el sitio
+  cambia un precio, el test falla acá a propósito — corregí el JSON, no la aserción.
+
+  Los datos de tarjeta del pago no están en este archivo: salen del `.env`
+  (`CARD_NAME`, `CARD_NUMBER`, `CARD_CVC`, `CARD_MONTH`, `CARD_YEAR`), igual que
+  `SHOPPING_EMAIL`, que es el email con el que ese test registra su cuenta.
+
 ## Campos obligatorios que quedan fuera a propósito
 
 Verificado contra el formulario real del sitio:
