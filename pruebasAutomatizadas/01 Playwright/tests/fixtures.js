@@ -64,8 +64,7 @@ export const test = base.extend({
       year: process.env.CARD_YEAR,
     });
   },
-  // Estos fixtures no navegan: si dos navegaran, ganaria el ultimo en correr.
-  // La navegacion la maneja el test de forma explicita.
+  // fixtures de carrito y checkout
   cart: async ({ page }, use) => {
     await use(new CartPage(page));
   },

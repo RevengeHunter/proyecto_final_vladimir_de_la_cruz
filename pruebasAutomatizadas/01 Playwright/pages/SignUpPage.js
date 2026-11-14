@@ -9,6 +9,13 @@ export class SignUpPage {
     this.emailAlreadyExistsError = page.getByText(
       "Email Address already exist!",
     );
+
+    // El sitio sirve signup y login en la misma pagina (/login): este heading
+    // es del formulario de login, para confirmar que se llego ahi.
+    this.loginHeading = page.getByRole("heading", {
+      name: "Login to your account",
+      level: 2,
+    });
   }
 
   // Method to go to the login page

@@ -1,11 +1,11 @@
-// /view_cart y /checkout renderizan la misma tabla de productos, asi que las dos
-// paginas usan este helper por composicion en vez de duplicar los locators.
+// /view_cart y /checkout usan esta clase en vez de duplicar los locators.
 export class CartTable {
   constructor(page) {
     this.page = page;
 
     this.container = page.locator("#cart_info");
     this.rows = this.container.locator('tr[id^="product-"]');
+    // Nota: la fila "Total Amount" solo existe en /checkout.
     this.totalAmount = this.container.locator(".cart_total_price").last();
   }
 

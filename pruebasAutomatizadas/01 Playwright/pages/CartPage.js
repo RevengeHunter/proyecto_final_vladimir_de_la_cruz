@@ -21,9 +21,7 @@ export class CartPage {
     await this.page.goto("products");
   }
 
-  // Cada producto tiene DOS enlaces add-to-cart con el mismo data-product-id
-  // (uno en .productinfo y otro en .product-overlay), asi que hay que acotarlo
-  // o el locator choca con el strict mode de Playwright.
+  // Cada producto tiene DOS enlaces add-to-cart con el mismo data-product-id.
   addToCartLink(clotheId) {
     return this.page.locator(
       `.productinfo a.add-to-cart[data-product-id="${clotheId}"]`,
