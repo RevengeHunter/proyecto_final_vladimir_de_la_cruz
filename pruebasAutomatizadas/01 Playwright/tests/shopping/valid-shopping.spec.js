@@ -22,10 +22,9 @@ async function expectCartTable(table) {
 }
 
 test.describe("Compra completa", () => {
-  test.skip(
-    ({ browserName }) => browserName !== "chromium",
-    "email fijo: no puede registrarse en paralelo",
-  );
+  // Corre en los 3 navegadores: el fixture shoppingAccount le da a cada uno su
+  // propio email (test-data/data-login-user-web-browser.json), asi que las tres
+  // cuentas conviven sin pisarse.
 
   // Red de seguridad: si el test falla a mitad de camino, la cuenta queda
   // registrada y la corrida siguiente choca con "Email Address already exist!".
@@ -52,6 +51,7 @@ test.describe("Compra completa", () => {
     await createAccount.createAccount({
       ...accountFormData,
       name: shoppingAccount.name,
+      password: shoppingAccount.password,
     });
     await expect(createAccount.accountCreatedHeading).toBeVisible();
     await createAccount.continueButton.click();

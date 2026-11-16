@@ -8,6 +8,7 @@ import { ViewCartPage } from "../pages/ViewCartPage";
 import { CheckoutPage } from "../pages/CheckoutPage";
 import { PaymentPage } from "../pages/PaymentPage";
 import accountData from "../test-data/data-sign-up-account.json";
+import browserUsers from "../test-data/data-login-user-web-browser.json";
 
 export const test = base.extend({
   loginPage: async ({ page }, use) => {
@@ -49,10 +50,25 @@ export const test = base.extend({
     const createAccount = new CreateAccountPage(page);
     await use(createAccount);
   },
-  shoppingAccount: async ({}, use) => {
+  // Un email por navegador: la cuenta queda registrada mientras dura la compra,
+  // asi que si los tres proyectos usaran el mismo, el segundo en llegar chocaria
+  // con "Email Address already exist!". Con uno distinto cada uno, el test de
+  // compra corre en paralelo en chromium, firefox y webkit.
+  shoppingAccount: async ({ browserName }, use) => {
+    const browserUser = browserUsers.find(
+      (user) => user.web_browser === browserName,
+    );
+
+    if (!browserUser) {
+      throw new Error(
+        `No hay usuario para "${browserName}" en test-data/data-login-user-web-browser.json`,
+      );
+    }
+
     await use({
       name: process.env.SIGNUP_NAME,
-      email: process.env.SHOPPING_EMAIL,
+      email: browserUser.email,
+      password: process.env.LOGIN_PASSWORD,
     });
   },
   paymentData: async ({}, use) => {

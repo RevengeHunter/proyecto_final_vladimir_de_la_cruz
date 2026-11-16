@@ -17,8 +17,17 @@
   cambia un precio, el test falla acá a propósito — corregí el JSON, no la aserción.
 
   Los datos de tarjeta del pago no están en este archivo: salen del `.env`
-  (`CARD_NAME`, `CARD_NUMBER`, `CARD_CVC`, `CARD_MONTH`, `CARD_YEAR`), igual que
-  `SHOPPING_EMAIL`, que es el email con el que ese test registra su cuenta.
+  (`CARD_NAME`, `CARD_NUMBER`, `CARD_CVC`, `CARD_MONTH`, `CARD_YEAR`).
+
+- **`data-login-user-web-browser.json`** — un usuario por navegador (`chromium`, `firefox`,
+  `webkit`) para `tests/shopping/valid-shopping.spec.js`.
+
+  El motivo: ese test **registra** la cuenta y la usa hasta el final de la compra. Con un email
+  único, el segundo navegador que llegara chocaría con "Email Address already exist!" — por eso
+  antes estaba limitado a chromium. El fixture `shoppingAccount` busca la entrada cuyo
+  `web_browser` coincide con el navegador que está corriendo, así que las tres cuentas conviven
+  y el test corre en paralelo en los tres. Si agregás un proyecto con otro navegador, el fixture
+  falla con un mensaje claro hasta que le sumes su entrada acá.
 
 - **`data-internet-credentials.json`** — usuario y password de
   `the-internet.herokuapp.com`, que usan los 7 specs de `tests/authentication/` y
