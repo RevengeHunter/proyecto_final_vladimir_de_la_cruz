@@ -1,4 +1,5 @@
 import { test, expect } from "../fixtures";
+import internetCredentials from "../../test-data/data-internet-credentials.json";
 
 test.describe("Validar Tiempo de espera del Código de Inicio de Sesion de Doble Factor", () => {
   test.skip(
@@ -6,10 +7,13 @@ test.describe("Validar Tiempo de espera del Código de Inicio de Sesion de Doble
     "espera real de 3 min: solo chromium",
   );
 
-  test("código expirado", async ({ loginPageTwoFactor, credentials }) => {
+  test("código expirado", async ({ loginPageTwoFactor }) => {
     test.setTimeout(240_000);
 
-    await loginPageTwoFactor.login(credentials.username, credentials.password);
+    await loginPageTwoFactor.login(
+      internetCredentials.username,
+      internetCredentials.password,
+    );
     await expect(loginPageTwoFactor.page).toHaveURL(/code/);
     await expect(loginPageTwoFactor.twoFactorCodeHeading).toBeVisible();
 

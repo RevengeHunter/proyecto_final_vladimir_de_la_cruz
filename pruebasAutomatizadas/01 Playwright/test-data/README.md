@@ -20,6 +20,19 @@
   (`CARD_NAME`, `CARD_NUMBER`, `CARD_CVC`, `CARD_MONTH`, `CARD_YEAR`), igual que
   `SHOPPING_EMAIL`, que es el email con el que ese test registra su cuenta.
 
+- **`data-internet-credentials.json`** — usuario y password de
+  `the-internet.herokuapp.com`, que usan los 7 specs de `tests/authentication/` y
+  `tests/authentication-two-factor/`.
+
+  Están versionadas a propósito y **no** en el `.env`: el propio sitio las publica en sus
+  páginas de login, así que no son un secreto, y de esta forma el proyecto corre sin configurar
+  nada extra. Las credenciales de automationexercise sí siguen en el `.env`, porque esas son
+  tuyas.
+
+  Lo que sí vive en el `.env` de este sitio es la URL: `INTERNET_URL`. Cada grupo de proyectos
+  de `playwright.config.js` declara su propio `baseURL`, así que estos specs corren contra
+  the-internet y los demás contra automationexercise.
+
 ## Campos obligatorios que quedan fuera a propósito
 
 Verificado contra el formulario real del sitio:
