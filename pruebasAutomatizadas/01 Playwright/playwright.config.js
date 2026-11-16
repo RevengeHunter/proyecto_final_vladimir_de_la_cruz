@@ -1,5 +1,7 @@
 // @ts-check
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+dotenv.config();
 
 /**
  * Read environment variables from file.
@@ -9,11 +11,15 @@ import { defineConfig, devices } from '@playwright/test';
 // import path from 'path';
 // dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+// Los specs de login y doble factor de the-internet: las dos carpetas
+// tests/authentication y tests/authentication-two-factor.
+const theInternetTests = "**/authentication*/**";
+
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: "./tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -23,31 +29,56 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
+    /* El baseURL NO va aca: cada proyecto declara el suyo, asi ningun spec
+       hereda el sitio equivocado por descuido. */
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: "on-first-retry",
   },
 
-  /* Configure projects for major browsers */
+  /* Un grupo de proyectos por sitio: las dos carpetas de autenticacion corren
+     contra the-internet y el resto contra automationexercise. Cada spec cae en
+     un solo grupo, asi que nada corre dos veces.
+     Los test.skip por browserName siguen funcionando: browserName es el
+     navegador del proyecto (chromium/firefox/webkit), no su nombre. */
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "automationexercise-chromium",
+      use: { ...devices["Desktop Chrome"], baseURL: process.env.BASE_URL },
+      testIgnore: theInternetTests,
     },
 
     {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      name: "automationexercise-firefox",
+      use: { ...devices["Desktop Firefox"], baseURL: process.env.BASE_URL },
+      testIgnore: theInternetTests,
     },
 
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      name: "automationexercise-webkit",
+      use: { ...devices["Desktop Safari"], baseURL: process.env.BASE_URL },
+      testIgnore: theInternetTests,
+    },
+
+    {
+      name: "the-internet-chromium",
+      use: { ...devices["Desktop Chrome"], baseURL: process.env.INTERNET_URL },
+      testMatch: theInternetTests,
+    },
+
+    {
+      name: "the-internet-firefox",
+      use: { ...devices["Desktop Firefox"], baseURL: process.env.INTERNET_URL },
+      testMatch: theInternetTests,
+    },
+
+    {
+      name: "the-internet-webkit",
+      use: { ...devices["Desktop Safari"], baseURL: process.env.INTERNET_URL },
+      testMatch: theInternetTests,
     },
 
     /* Test against mobile viewports. */
@@ -78,4 +109,3 @@ export default defineConfig({
   //   reuseExistingServer: !process.env.CI,
   // },
 });
-
