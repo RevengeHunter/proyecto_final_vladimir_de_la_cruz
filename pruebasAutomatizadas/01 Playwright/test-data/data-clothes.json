@@ -1,0 +1,22 @@
+[
+  {
+    "clotheId": 1,
+    "clotheName": "Blue Top",
+    "clothePrice": 500
+  },
+  {
+    "clotheId": 8,
+    "clotheName": "Fancy Green Top",
+    "clothePrice": 700
+  },
+  {
+    "clotheId": 42,
+    "clotheName": "Lace Top For Women",
+    "clothePrice": 1400
+  },
+  {
+    "clotheId": 7,
+    "clotheName": "Madame Top For Women",
+    "clothePrice": 1000
+  }
+]
