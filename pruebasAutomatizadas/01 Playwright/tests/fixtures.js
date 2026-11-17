@@ -1,4 +1,6 @@
 import { test as base, expect } from "@playwright/test";
+import path from "node:path";
+import * as allure from "allure-js-commons";
 import { LoginPage } from "../pages/LoginPage";
 import { LoginPageTwoFactor } from "../pages/LoginPageTwoFactor";
 import { SignUpPage } from "../pages/SignUpPage";
@@ -12,6 +14,25 @@ import accountData from "../test-data/data-sign-up-account.json";
 import browserUsers from "../test-data/data-login-user-web-browser.json";
 
 export const test = base.extend({
+  // Agrupa la pestania Behaviors del reporte de Allure: epic = sistema bajo
+  // prueba, feature = carpeta del spec. Es auto, asi que alcanza a todos los
+  // specs sin que ninguno tenga que pedirlo. El parentSuite (el proyecto de
+  // Playwright) ya lo pone solo el reporter.
+  allureGrouping: [
+    async ({}, use, testInfo) => {
+      const esAutenticacion = testInfo.project.name.startsWith("the-internet");
+
+      await allure.epic(
+        esAutenticacion
+          ? "Autenticacion - the-internet"
+          : "Sistema de compras - automationexercise",
+      );
+      await allure.feature(path.basename(path.dirname(testInfo.file)));
+
+      await use();
+    },
+    { auto: true },
+  ],
   loginPage: async ({ page }, use) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();

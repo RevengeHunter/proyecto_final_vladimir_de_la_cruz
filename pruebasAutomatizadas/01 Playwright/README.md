@@ -15,6 +15,9 @@ Son **66 pruebas** en total: 62 pasan y 4 quedan en skip a propósito (ver
 
 - Node.js 18 o superior
 - `@playwright/test` ^1.64 y `dotenv` ^18 (se instalan con `npm install`)
+- `allure-playwright` ^3.14 y `allure-commandline` ^2.46 para el informe (idem)
+- **Un JDK en el PATH**: `allure` es una herramienta Java. Sin eso las pruebas corren igual, pero
+  `npm run report` no genera nada
 
 ## Puesta en marcha
 
@@ -42,12 +45,20 @@ de cada archivo de datos está en [`test-data/README.md`](test-data/README.md).
 ## Cómo correr
 
 ```powershell
-npx playwright test                                   # toda la suite (~3,5 min)
-npx playwright test tests/shopping --reporter=list    # una carpeta
+npm test                                              # toda la suite (~3,5 min)
+npm run test:compras                                  # los 3 navegadores de automationexercise
+npm run test:auth                                     # los 3 navegadores de the-internet
+npx playwright test tests/shopping                    # una carpeta
 npx playwright test --project=the-internet-chromium   # un proyecto
+npx playwright test --project="automationexercise-*"  # el flag acepta globs
 npx playwright test --list                            # qué spec cae en qué proyecto, sin ejecutar
-npx playwright show-report                            # reporte HTML de la última corrida
 ```
+
+Los dos scripts por sistema son ese glob y nada más: `test:compras` es
+`--project="automationexercise-*"` y `test:auth` es `--project="the-internet-*"`.
+
+**No pases `--reporter=...` en la línea de comandos**: reemplaza la lista completa del config y deja
+a Allure afuera, así que la corrida no produce informe.
 
 Para depurar: `--headed` abre el navegador, `--debug` lo corre paso a paso y `--ui` abre el modo
 interactivo.
@@ -58,6 +69,62 @@ código de doble factor. Si querés una corrida rápida, saltealo:
 ```powershell
 npx playwright test --grep-invert "expirado"
 ```
+
+## Reportes
+
+Cada corrida deja estas salidas, todas fuera del repositorio (están en el `.gitignore`):
+
+| Salida                     | Qué es                                                 |
+| -------------------------- | ------------------------------------------------------ |
+| `allure-results/`          | Resultados crudos; es la **entrada** del informe       |
+| `allure-report/`           | El informe navegable, generado a partir de lo anterior |
+| `reportes/resultados.json` | La misma corrida en JSON, para leerla con un script    |
+| `evidences/`               | Captura, video y traza de los tests que fallaron       |
+
+Generar el informe son **dos pasos**, y a propósito: en npm un `&&` corta si el comando anterior
+falla, y un test rojo es justo cuando más se quiere el informe.
+
+| Qué querés                          | Comandos                                          |
+| ----------------------------------- | ------------------------------------------------- |
+| Informe de toda la suite            | `npm test` y después `npm run report`             |
+| Informe solo del sistema de compras | `npm run test:compras` y después `npm run report` |
+| Informe solo de autenticación       | `npm run test:auth` y después `npm run report`    |
+| Abrir el informe ya generado        | `npm run report:open`                             |
+| Verlo sin generar carpeta           | `npm run report:serve`                            |
+| Borrar resultados e informe         | `npm run report:clean`                            |
+
+### Cada corrida arranca de cero
+
+Allure **no** limpia `allure-results`: su writer solo crea la carpeta, nunca borra. Dos corridas
+seguidas se sumarían, así que el informe "de un sistema" saldría con los tests del otro adentro y
+con los fallos de la corrida anterior revividos. Por eso el config declara:
+
+```js
+globalSetup: "./clean-allure-results.js",
+```
+
+que vacía la carpeta antes de cada corrida. La contrapartida: **el informe de toda la suite sale de
+una corrida de toda la suite**, no de dos corridas parciales encadenadas.
+
+Un detalle que confunde: `--list` también escribe resultados (lista los tests y los marca como
+omitidos) y **no** pasa por el `globalSetup`. Si generás el informe justo después de un `--list`,
+aparecen pruebas fantasma; se arregla corriendo la suite de nuevo.
+
+### Dónde se ve la separación de los dos sistemas
+
+| Pestaña        | Cómo queda agrupado                                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Behaviors**  | Dos _epics_: "Sistema de compras - automationexercise" y "Autenticacion - the-internet", y dentro un _feature_ por carpeta de specs |
+| **Suites**     | Los 6 proyectos de Playwright (`automationexercise-chromium`, `the-internet-webkit`, ...)                                           |
+| **Categories** | Los fallos por causa: cuenta duplicada, locator ambiguo, espera agotada, sitio caído o red                                          |
+
+El _epic_ y el _feature_ los pone un fixture `auto` en `tests/fixtures.js`: mira
+`testInfo.project.name` para saber el sistema, y el nombre de la carpeta del spec para el feature.
+Al ser `auto` alcanza a los 14 specs sin que ninguno tenga que pedirlo, y el `parentSuite` con el
+nombre del proyecto ya lo pone el reporter solo.
+
+**Environment** muestra las dos URLs, la versión de Node y el sistema operativo. **Del `.env` no
+llega nada más que esas dos URLs públicas**: las credenciales no se publican en el informe.
 
 ## Un `baseURL` por sitio
 
@@ -124,9 +191,10 @@ Los proyectos `the-internet-*` lo usan como `testMatch` y los `automationexercis
 ## Organización del código
 
 ```
-pages/        Page Objects: un archivo por página, solo locators y acciones
-tests/        Specs agrupados por funcionalidad, más fixtures.js
-test-data/    Datos de prueba en JSON (ver su propio README)
+pages/                     Page Objects: un archivo por página, solo locators y acciones
+tests/                     Specs agrupados por funcionalidad, más fixtures.js
+test-data/                 Datos de prueba en JSON (ver su propio README)
+clean-allure-results.js    globalSetup: vacía allure-results antes de cada corrida
 ```
 
 Convenciones que conviene respetar al agregar pruebas:
@@ -171,3 +239,6 @@ Convenciones que conviene respetar al agregar pruebas:
 | "Email Address already exist!"                                    | Una corrida anterior falló a mitad y dejó la cuenta viva. Se borra entrando a `/delete_account` con la sesión abierta          |
 | `strict mode violation` al agregar al carrito                     | Cada producto tiene **dos** enlaces `add-to-cart` con el mismo `data-product-id`; el locator hay que acotarlo a `.productinfo` |
 | Un locator por rol no encuentra un elemento que se ve en pantalla | Varios `<a>` del sitio no tienen `href`, así que no tienen rol de link: se localizan por texto                                 |
+| `npm run report` no genera nada, o se queja de Java               | `allure-commandline` corre sobre la JVM: hace falta un JDK en el PATH                                                          |
+| El informe trae pruebas que no se corrieron                       | Un `--list` previo dejó resultados y no pasa por el `globalSetup`: `npm run report:clean` y correr de nuevo                    |
+| El informe sale vacío                                             | Se corrió con `--reporter=...` en la línea de comandos, que reemplaza la lista del config y deja a Allure afuera               |

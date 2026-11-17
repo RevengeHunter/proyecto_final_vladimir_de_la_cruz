@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, devices } from "@playwright/test";
+import os from "node:os";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -28,15 +29,62 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* El baseURL NO va aca: cada proyecto declara el suyo, asi ningun spec
-       hereda el sitio equivocado por descuido. */
+  /* Carpeta de evidencias: solo guarda lo que se conserva por fallo */
+  outputDir: "evidences",
+  /* Borra allure-results antes de cada corrida: Allure no lo hace solo y los
+     resultados viejos se mezclarian en el reporte. */
+  globalSetup: "./clean-allure-results.js",
+  reporter: [
+    ["list"],
+    ["json", { outputFile: "reportes/resultados.json" }],
+    [
+      "allure-playwright",
+      {
+        resultsDir: "allure-results",
+        /* Oculta los pasos internos de hooks y fixtures: con 4 productos y sus
+           modales, el arbol de pasos tapa lo que importa. */
+        detail: false,
+        /* El nombre del archivo como suite, dentro del proyecto. */
+        suiteTitle: true,
+        /* Solo datos publicos: las credenciales del .env NO van al reporte. */
+        environmentInfo: {
+          "Sistema de compras": process.env.BASE_URL ?? "(sin definir)",
+          "Sistema de autenticacion":
+            process.env.INTERNET_URL ?? "(sin definir)",
+          Node: process.version,
+          SO: `${os.type()} ${os.release()}`,
+        },
+        /* Agrupa los fallos por causa en la pestania Categories. */
+        categories: [
+          {
+            name: "Cuenta duplicada en el sitio",
+            messageRegex: ".*already exist.*",
+            matchedStatuses: ["failed"],
+          },
+          {
+            name: "Locator ambiguo (strict mode)",
+            messageRegex: ".*strict mode violation.*",
+            matchedStatuses: ["failed", "broken"],
+          },
+          {
+            name: "Espera agotada",
+            messageRegex: ".*Timeout.*exceeded.*",
+            matchedStatuses: ["failed", "broken"],
+          },
+          {
+            name: "Sitio caido o red",
+            messageRegex: ".*(net::ERR|50\\d).*",
+            matchedStatuses: ["failed", "broken"],
+          },
+        ],
+      },
+    ],
+  ],
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
+  use: {
+    trace: "retain-on-failure" /* trace solo si falla o no termina */,
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
 
   /* Un grupo de proyectos por sitio: las dos carpetas de autenticacion corren
