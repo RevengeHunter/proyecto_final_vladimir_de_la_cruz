@@ -44,10 +44,8 @@ export class SearchPage {
     await this.searchInput.fill(term);
 
     const [response] = await Promise.all([
-      this.page.waitForResponse(
-        (res) =>
-          res.url().endsWith(`/products?search=${term}`) &&
-          res.status() === 200,
+      this.page.waitForResponse((res) =>
+        res.url().endsWith(`/products?search=${term}`),
       ),
       this.searchButton.click(),
     ]);
