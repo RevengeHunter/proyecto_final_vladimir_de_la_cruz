@@ -7,6 +7,7 @@ import { CartPage } from "../pages/CartPage";
 import { ViewCartPage } from "../pages/ViewCartPage";
 import { CheckoutPage } from "../pages/CheckoutPage";
 import { PaymentPage } from "../pages/PaymentPage";
+import { SearchPage } from "../pages/SearchPage";
 import accountData from "../test-data/data-sign-up-account.json";
 import browserUsers from "../test-data/data-login-user-web-browser.json";
 
@@ -92,6 +93,9 @@ export const test = base.extend({
   },
   payment: async ({ page }, use) => {
     await use(new PaymentPage(page));
+  },
+  search: async ({ page }, use) => {
+    await use(new SearchPage(page));
   },
 });
 

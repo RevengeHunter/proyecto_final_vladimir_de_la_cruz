@@ -8,7 +8,7 @@ sitios públicos de práctica:
 - **[the-internet.herokuapp.com](https://the-internet.herokuapp.com/)** — login y login con
   autenticación de doble factor.
 
-Son **60 pruebas** en total: 56 pasan y 4 quedan en skip a propósito (ver
+Son **66 pruebas** en total: 62 pasan y 4 quedan en skip a propósito (ver
 [Decisiones y límites](#decisiones-y-límites)).
 
 ## Requisitos
@@ -114,6 +114,13 @@ Los proyectos `the-internet-*` lo usan como `testMatch` y los `automationexercis
 | `delete-product-checkout.spec.js`    | Borra un producto y comprueba, recargando, que el borrado es real        |
 | `request-login-for-checkout.spec.js` | Usuario anónimo: el checkout exige iniciar sesión primero                |
 
+### `tests/search-product/` — búsqueda en automationexercise
+
+| Spec                              | Qué valida                                                                         |
+| --------------------------------- | ---------------------------------------------------------------------------------- |
+| `text-search-product.spec.js`     | Busca "shirts" esperando la respuesta de la navegación: 200 y trae productos       |
+| `category-search-product.spec.js` | Filtra por Kids - Tops & Shirts esperando el cambio de URL a `category_products/5` |
+
 ## Organización del código
 
 ```
@@ -151,6 +158,10 @@ Convenciones que conviene respetar al agregar pruebas:
 - **Defecto detectado en automationexercise:** el checkout solo valida la sesión del lado del
   cliente. El modal "Register / Login account to proceed on checkout" lo muestra JavaScript, pero
   un `GET /checkout` sin sesión devuelve **200**. La prueba cubre el comportamiento por la UI.
+- **La búsqueda no distingue por código de estado.** Un término sin resultados responde igual
+  **200**, con la lista vacía y el mismo heading, y la API (`POST /api/searchProduct`) devuelve
+  siempre HTTP 200 con el código real dentro del JSON. No hay ningún 204 que probar, así que el
+  spec de búsqueda cubre el caso con datos.
 
 ## Si algo falla
 

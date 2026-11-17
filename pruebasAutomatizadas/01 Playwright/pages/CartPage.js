@@ -2,9 +2,6 @@ export class CartPage {
   constructor(page) {
     this.page = page;
 
-    this.searchInput = page.getByRole("textbox", { name: "Search Product" });
-    this.searchButton = page.locator('[id="submit_search"]');
-
     this.proceedToCartView = page.getByRole("link", { name: "Cart" });
 
     this.productAddMessage = page.getByRole("heading", {
