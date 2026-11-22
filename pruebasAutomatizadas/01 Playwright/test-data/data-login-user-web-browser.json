@@ -1,0 +1,14 @@
+[
+  {
+    "web_browser": "chromium",
+    "email": "qa.chromium@example.com"
+  },
+  {
+    "web_browser": "firefox",
+    "email": "qa.firefox@example.com"
+  },
+  {
+    "web_browser": "webkit",
+    "email": "qa.webkit@example.com"
+  }
+]
