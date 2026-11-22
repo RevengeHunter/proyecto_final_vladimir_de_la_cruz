@@ -8,8 +8,9 @@ sitios públicos de práctica:
 - **[the-internet.herokuapp.com](https://the-internet.herokuapp.com/)** — login y login con
   autenticación de doble factor.
 
-Son **66 pruebas** en total: 62 pasan y 4 quedan en skip a propósito (ver
-[Decisiones y límites](#decisiones-y-límites)).
+Las cifras de la última corrida —cantidad de pruebas, tiempos y reparto por proyecto— están en
+[Métricas](#métricas). Los skips son a propósito y se explican en
+[Decisiones y límites](#decisiones-y-límites).
 
 ## Requisitos
 
@@ -126,6 +127,49 @@ nombre del proyecto ya lo pone el reporter solo.
 **Environment** muestra las dos URLs, la versión de Node y el sistema operativo. **Del `.env` no
 llega nada más que esas dos URLs públicas**: las credenciales no se publican en el informe.
 
+## Métricas
+
+<!-- metricas:inicio -->
+
+> Corrida del 2026-11-22 00:05 · **66 pruebas** en **5 min 38 s** · 62 pasan · 0 fallan · 4 en skip
+
+| Proyecto                      | Pruebas | Pasan  | Fallan | Skip  | Suma de duraciones |
+| ----------------------------- | ------- | ------ | ------ | ----- | ------------------ |
+| `automationexercise-chromium` | 15      | 15     | 0      | 0     | 2 min 20 s         |
+| `automationexercise-firefox`  | 15      | 14     | 0      | 1     | 2 min 29 s         |
+| `automationexercise-webkit`   | 15      | 14     | 0      | 1     | 3 min 07 s         |
+| `the-internet-chromium`       | 7       | 7      | 0      | 0     | 3 min 42 s         |
+| `the-internet-firefox`        | 7       | 6      | 0      | 1     | 51 s               |
+| `the-internet-webkit`         | 7       | 6      | 0      | 1     | 35 s               |
+| **Total**                     | **66**  | **62** | **0**  | **4** | **5 min 38 s**     |
+
+<!-- metricas:fin -->
+
+La tabla la arma `metrics.js` leyendo `reportes/resultados.json`, que escribe cada corrida. Para
+actualizarla:
+
+```powershell
+npm test                 # la suite completa: con un solo sistema los números mienten
+npm run metrics          # imprime la tabla, no toca nada
+npm run metrics:write    # la deja acá arriba, entre los marcadores
+```
+
+`metrics:write` **se niega a escribir si la última corrida fue parcial** (menos de los 6
+proyectos), para que no terminen en el README los números de medio sistema haciéndose pasar por
+los de la suite.
+
+Dos aclaraciones sobre los tiempos, porque `fullyParallel` está activo:
+
+- **El total es tiempo de reloj** (`stats.duration`): lo que tardó la corrida de punta a punta.
+- **Las filas son la suma de las duraciones** de las pruebas de ese proyecto. Esa suma da más que
+  el total, y está bien: los proyectos corren a la vez.
+
+Para contar las pruebas sin ejecutar nada:
+
+```powershell
+npx playwright test --list --reporter=list
+```
+
 ## Un `baseURL` por sitio
 
 `playwright.config.js` define **6 proyectos**: tres navegadores por cada sitio. El reparto de
@@ -195,6 +239,7 @@ pages/                     Page Objects: un archivo por página, solo locators y
 tests/                     Specs agrupados por funcionalidad, más fixtures.js
 test-data/                 Datos de prueba en JSON (ver su propio README)
 clean-allure-results.js    globalSetup: vacía allure-results antes de cada corrida
+metrics.js                 Arma la tabla de métricas desde reportes/resultados.json
 ```
 
 Convenciones que conviene respetar al agregar pruebas:
@@ -230,6 +275,17 @@ Convenciones que conviene respetar al agregar pruebas:
   **200**, con la lista vacía y el mismo heading, y la API (`POST /api/searchProduct`) devuelve
   siempre HTTP 200 con el código real dentro del JSON. No hay ningún 204 que probar, así que el
   spec de búsqueda cubre el caso con datos.
+- **La publicidad del sitio se bloquea durante las pruebas.** El intersticial de Google
+  (`#google_vignette`) le pone `aria-hidden="true"` al `<body>`: mientras está arriba ningún
+  `getByRole` encuentra nada y nada es clickeable, así que la prueba espera hasta agotar el
+  timeout. Cerrarlo no es opción: su botón `Close ad` vive dentro de un iframe de doubleclick y los
+  locators de Playwright no atraviesan iframes. El fixture `blockAds` de `tests/fixtures.js` aborta
+  las peticiones a los dominios de anuncios, así que el anuncio no llega a existir. **Lo que se
+  pierde:** las pruebas ya no ven la página exactamente como la ve un usuario real.
+- **Un reintento en local** (`retries: 1`, y 2 en CI). El sitio de práctica devuelve Cloudflare
+  **520** cada tanto y tumba pruebas que están bien escritas. Con el reintento esa corrida se
+  recupera sola y la prueba queda marcada **flaky** en el reporte, que es información honesta:
+  distingue "falló el sitio" de "la prueba está mal".
 
 ## Si algo falla
 
@@ -242,3 +298,5 @@ Convenciones que conviene respetar al agregar pruebas:
 | `npm run report` no genera nada, o se queja de Java               | `allure-commandline` corre sobre la JVM: hace falta un JDK en el PATH                                                          |
 | El informe trae pruebas que no se corrieron                       | Un `--list` previo dejó resultados y no pasa por el `globalSetup`: `npm run report:clean` y correr de nuevo                    |
 | El informe sale vacío                                             | Se corrió con `--reporter=...` en la línea de comandos, que reemplaza la lista del config y deja a Allure afuera               |
+| Una prueba se cuelga hasta el timeout en una página ya cargada    | Un anuncio intersticial tapó la página y la dejó con `aria-hidden="true"`: lo corta el fixture `blockAds`                      |
+| `Error code 520` de Cloudflare en la captura del fallo            | El sitio de práctica caído, no la prueba. Allure los junta en la categoría "Sitio caido o red" y el reintento suele salvarla   |

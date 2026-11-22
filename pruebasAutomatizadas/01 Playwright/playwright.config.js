@@ -25,8 +25,10 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Un reintento en local: el sitio se cae cada tanto (Cloudflare 520) y asi
+     esa corrida se recupera sola y queda marcada flaky, que distingue "fallo el
+     sitio" de "la prueba esta mal". */
+  retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Carpeta de evidencias: solo guarda lo que se conserva por fallo */

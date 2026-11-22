@@ -14,6 +14,22 @@ import accountData from "../test-data/data-sign-up-account.json";
 import browserUsers from "../test-data/data-login-user-web-browser.json";
 
 export const test = base.extend({
+  // El intersticial de Google (#google_vignette) le pone aria-hidden="true" al
+  // body: Se detecto uso de avisos publicitarios que no se cierran y genera timeout. Su boton
+  // "Close ad" vive dentro de un iframe de doubleclick, fuera del alcance de los locators.
+  // Con estos cuatro dominios alcanza. Los otros ~20 hosts de publicidad que aparecen en el trace,
+  // script de adsbygoogle, entonces si no carga, no se pide el cierre de estos. Solucion - Bloquear anuncios.
+  blockAds: [
+    async ({ context }, use) => {
+      await context.route(
+        /(googlesyndication\.com|doubleclick\.net|adtrafficquality\.google|fundingchoicesmessages\.google\.com)/,
+        (route) => route.abort(),
+      );
+
+      await use();
+    },
+    { auto: true },
+  ],
   // Agrupa la pestania Behaviors del reporte de Allure: epic = sistema bajo
   // prueba, feature = carpeta del spec. Es auto, asi que alcanza a todos los
   // specs sin que ninguno tenga que pedirlo. El parentSuite (el proyecto de
