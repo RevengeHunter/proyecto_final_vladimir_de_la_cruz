@@ -16,7 +16,8 @@ Las cifras de la última corrida —cantidad de pruebas, tiempos y reparto por p
 
 - Node.js 18 o superior
 - `@playwright/test` ^1.64 y `dotenv` ^18 (se instalan con `npm install`)
-- `allure-playwright` ^3.14 y `allure-commandline` ^2.46 para el informe (idem)
+- `allure-playwright` ^3.14, `allure-js-commons` ^3.14 y `allure-commandline` ^2.46 para el
+  informe (idem)
 - **Un JDK en el PATH**: `allure` es una herramienta Java. Sin eso las pruebas corren igual, pero
   `npm run report` no genera nada
 
@@ -46,7 +47,7 @@ de cada archivo de datos está en [`test-data/README.md`](test-data/README.md).
 ## Cómo correr
 
 ```powershell
-npm test                                              # toda la suite (~3,5 min)
+npm test                                              # toda la suite (~5,5 min)
 npm run test:compras                                  # los 3 navegadores de automationexercise
 npm run test:auth                                     # los 3 navegadores de the-internet
 npx playwright test tests/shopping                    # una carpeta
@@ -164,6 +165,10 @@ Dos aclaraciones sobre los tiempos, porque `fullyParallel` está activo:
 - **Las filas son la suma de las duraciones** de las pruebas de ese proyecto. Esa suma da más que
   el total, y está bien: los proyectos corren a la vez.
 
+Los tiempos dependen de la máquina y de la red, así que valen como referencia de la computadora
+donde se corrió, no como número absoluto. Lo que sí es comparable entre corridas y entre máquinas
+es la **cantidad** de pruebas y su reparto por proyecto.
+
 Para contar las pruebas sin ejecutar nada:
 
 ```powershell
@@ -254,6 +259,9 @@ Convenciones que conviene respetar al agregar pruebas:
   hardcodeado, así no puede desincronizarse de los precios.
 - **Un `for` que llama a `test()`** genera una prueba independiente por caso; es lo que hace
   `required-fields-sign-up.spec.js` con los 9 campos obligatorios.
+- **Dos fixtures `auto` alcanzan a todos los specs** sin que ninguno los pida: `blockAds` corta el
+  tráfico de publicidad y `allureGrouping` arma la pestaña Behaviors del informe. Un spec nuevo los
+  hereda solo, no hay que agregar nada.
 
 ## Decisiones y límites
 
